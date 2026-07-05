@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌺 Epic Hawai'i 2026 | 9.28–10.6</title>
+<link rel="stylesheet" href="leaflet/leaflet.css" />
+<script src="leaflet/leaflet.js"></script>
+<style>
+:root{--oahu:#FF6B35;--bigisland:#E63946;--maui:#457B9D;--deep:#1D3557;--text:#2B2B2B}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F7F9FB;color:var(--text);line-height:1.7}
+.lang-zh,.lang-en{display:none!important}
+.lang-zh.active,.lang-en.active{display:block!important}
+span.lang-zh.active,span.lang-en.active,a.lang-zh.active,a.lang-en.active{display:inline!important}
+p.lang-zh.active,p.lang-en.active{display:block!important}
+h1.lang-zh.active,h1.lang-en.active,h2.lang-zh.active,h2.lang-en.active,h3.lang-zh.active,h3.lang-en.active,h4.lang-zh.active,h4.lang-en.active{display:block!important}
+div.lang-zh.active,div.lang-en.active{display:block!important}
+.lang-switch{position:fixed;top:16px;right:16px;z-index:200;display:flex;gap:4px;background:rgba(0,0,0,.6);border-radius:50px;padding:4px}
+.lang-switch button{border:none;padding:8px 18px;border-radius:50px;font-size:.82rem;font-weight:700;cursor:pointer;background:transparent;color:rgba(255,255,255,.7)}
+.lang-switch button.active{background:#fff;color:var(--deep)}
+.hero{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:#fff;padding:80px 24px 100px;text-align:center;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:800;margin-bottom:8px}
+.hero h1 span{background:linear-gradient(90deg,#FF6B35,#E63946,#457B9D);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .byline{font-size:1.1rem;opacity:.9;max-width:700px;margin:0 auto}
+.hero .dates{display:inline-block;background:rgba(255,255,255,.15);border-radius:50px;padding:8px 24px;margin-top:20px;font-size:.95rem}
+.stats-bar{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.06);max-width:700px;margin:-40px auto 40px;padding:28px 40px;position:relative;z-index:2}
+.stat{text-align:center}.stat .num{font-size:2rem;font-weight:800;color:var(--deep)}
+.stat .label{font-size:.85rem;color:#888;margin-top:4px}
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid #eee;padding:0 24px}
+nav ul{display:flex;justify-content:center;gap:8px;list-style:none;flex-wrap:nowrap;overflow-x:auto;padding:12px 0}
+nav a{text-decoration:none;padding:8px 16px;border-radius:50px;font-size:.88rem;font-weight:600;color:#555;white-space:nowrap}
+nav a:hover{background:#eee}
+section{max-width:1100px;margin:60px auto;padding:0 24px}
+.section-head{text-align:center;margin-bottom:40px}
+.section-head h2{font-size:2rem;font-weight:800}
+.section-head p{color:#777;margin-top:6px}
+#map-container{border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.08);margin-bottom:24px}
+#map{height:520px}
+.map-legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:12px;background:#fff}
+.legend-dot{display:flex;align-items:center;gap:4px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.legend-dot span{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.island-section{margin-top:60px}
+.island-hero{border-radius:20px;overflow:hidden;position:relative;height:280px;margin-bottom:32px}
+.island-hero .overlay{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+.island-hero .title-block{position:absolute;bottom:0;left:0;right:0;padding:36px 40px;color:#fff}
+.island-hero h3{font-size:2rem;font-weight:800}
+.island-hero .tagline{font-size:1rem;opacity:.9;margin-top:4px}
+.island-hero img{width:100%;height:100%;object-fit:cover}
+.spot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-top:24px}
+.spot-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s}
+.spot-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.spot-img{height:200px;position:relative;overflow:hidden}
+.spot-img img{width:100%;height:100%;object-fit:cover}
+.spot-img .replace-hint{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:.7rem;padding:3px 8px;border-radius:4px}
+.spot-body{padding:20px 22px 24px}
+.day-badge{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:50px;margin-bottom:8px}
+.day-badge.oahu{background:#FFF0EB;color:var(--oahu)}
+.day-badge.bigisland{background:#FFEBEE;color:var(--bigisland)}
+.day-badge.maui{background:#EBF3FA;color:var(--maui)}
+.spot-body h4{font-size:1.1rem;margin-bottom:6px}
+.hook{color:#555;font-size:.92rem;margin-bottom:12px}
+.meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-size:.8rem;color:#999}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap}
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;font-size:.85rem;font-weight:600;cursor:pointer;border:none}
+.btn-nav{background:#1a73e8;color:#fff}.btn-nav:hover{background:#1557b0}
+.btn-book{background:#34A853;color:#fff}.btn-book:hover{background:#2d9249}
+.timeline{margin-top:40px}
+.timeline-day{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start}
+.timeline-day .day-num{font-weight:800;font-size:.95rem;min-width:50px;text-align:right;padding-top:2px}
+.timeline-day .day-content{background:#fff;border-radius:12px;padding:14px 18px;flex:1;box-shadow:0 1px 8px rgba(0,0,0,.04)}
+.timeline-day .day-title{font-weight:700;margin-bottom:4px;font-size:.95rem}
+.timeline-day .day-desc{font-size:.85rem;color:#666}
+.transport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px}
+.transport-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,.04)}
+.transport-card .icon{font-size:1.5rem;margin-bottom:8px}
+.transport-card h4{font-size:.95rem;margin-bottom:6px}
+.transport-card p{font-size:.85rem;color:#666;line-height:1.5}
+.flight-tool{background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 4px 30px rgba(0,0,0,.06);margin-top:30px}
+.flight-tool h3{margin-bottom:6px}
+.flight-tool .note{color:#888;font-size:.82rem;margin-bottom:20px}
+.flight-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.flight-form select{padding:10px 14px;border-radius:10px;border:2px solid #e0e0e0;font-size:.9rem;font-family:inherit;min-width:0}
+.flight-form button{padding:12px 22px;border-radius:10px;background:var(--deep);color:#fff;border:none;font-size:.92rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.flight-form button:hover{background:#142E4A}
+.accom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px}
+.accom-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 16px rgba(0,0,0,.04);border-left:4px solid transparent}
+.accom-card.recommended{border-left-color:#34A853}
+.accom-card h4{font-size:.95rem;margin-bottom:4px}
+.accom-card p{font-size:.85rem;color:#666}
+.accom-card .pros-cons{display:flex;gap:16px;font-size:.82rem;margin-top:10px}
+.accom-card .pros{flex:1;color:#34A853}.accom-card .cons{flex:1;color:#999}
+.checklist{background:#FFF9E6;border-radius:16px;padding:24px 28px;margin-top:24px}
+.checklist h4{margin-bottom:14px}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.85rem;flex-wrap:wrap}
+.urgent{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.urgent.high{background:#FFEBEE;color:var(--bigisland)}
+.urgent.mid{background:#FFF3E0;color:var(--oahu)}
+.urgent.low{background:#E8F5E9;color:#34A853}
+footer{text-align:center;padding:50px 24px;background:var(--deep);color:#fff;margin-top:60px}
+footer p{font-size:.85rem}
+@media(max-width:768px){
+.hero{padding:40px 16px 60px}.hero h1{font-size:1.5rem}.hero .byline{font-size:.9rem}
+.hero .dates{font-size:.8rem}.stats-bar{margin:-30px 16px 30px;padding:16px 20px;gap:16px}
+.stat .num{font-size:1.3rem}.stat .label{font-size:.75rem}
+nav ul{padding:8px 0;gap:4px}nav a{font-size:.75rem;padding:6px 12px}
+.spot-grid{grid-template-columns:1fr}.transport-grid,.accom-grid{grid-template-columns:1fr}
+.island-hero{height:180px}.island-hero .title-block{padding:16px 20px}
+.island-hero h3{font-size:1.3rem}.island-hero .tagline{font-size:.82rem}
+#map{height:340px}.btn{font-size:.78rem;padding:7px 12px}
+.flight-form{flex-direction:column;align-items:stretch}.flight-form select{width:100%}
+.flight-form button{width:100%}
+.timeline-day .day-num{min-width:40px;font-size:.8rem}
+.timeline-day .day-content{padding:10px 14px}
+.checklist-item{font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="lang-switch">
+<button id="btn-zh" class="active" onclick="switchLang('zh')">中文</button>
+<button id="btn-en" onclick="switchLang('en')">EN</button>
+</div>
+
+<header class="hero">
+<h1 class="lang-zh active"><span>9天3岛 · Epic Hawai'i</span></h1>
+<h1 class="lang-en"><span>9 Days · 3 Islands · Epic Hawai'i</span></h1>
+<p class="byline lang-zh active">上天（云海）下海（浮潜）· 上山（火山）下水（浮潜）· 还有侏罗纪取景地！</p>
+<p class="byline lang-en">Cloud-sea sunsets · Lava glow at midnight · Snorkeling crystal coves · Jurassic Park IRL</p>
+<div class="dates">📅 2026.9.28 — 10.6</div>
+</header>
+
+<div class="stats-bar">
+<div class="stat"><div class="num">🏝️ 3</div><div class="label lang-zh active">岛屿</div><div class="label lang-en">Islands</div></div>
+<div class="stat"><div class="num">9</div><div class="label lang-zh active">天</div><div class="label lang-en">Days</div></div>
+<div class="stat"><div class="num">18+</div><div class="label lang-zh active">必打卡景点</div><div class="label lang-en">Must-sees</div></div>
+<div class="stat"><div class="num">2</div><div class="label lang-zh active">火山登顶</div><div class="label lang-en">Volcano Summits</div></div>
+</div>
+
+<nav><ul>
+<li><a href="#map-section"><span class="lang-zh active">🗺 地图</span><span class="lang-en">🗺 Map</span></a></li>
+<li><a href="#oahu"><span class="lang-zh active">🏝 欧胡</span><span class="lang-en">🏝 Oʻahu</span></a></li>
+<li><a href="#bigisland"><span class="lang-zh active">🌋 大岛</span><span class="lang-en">🌋 Big Island</span></a></li>
+<li><a href="#maui"><span class="lang-zh active">🌺 茂宜</span><span class="lang-en">🌺 Maui</span></a></li>
+<li><a href="#timeline"><span class="lang-zh active">📅 行程</span><span class="lang-en">📅 Schedule</span></a></li>
+<li><a href="#transport"><span class="lang-zh active">✈️ 交通</span><span class="lang-en">✈️ Transport</span></a></li>
+<li><a href="#accommodation"><span class="lang-zh active">🏨 住宿</span><span class="lang-en">🏨 Stay</span></a></li>
+<li><a href="#checklist"><span class="lang-zh active">📋 预约</span><span class="lang-en">📋 Book</span></a></li>
+<li><a href="#flight-search"><span class="lang-zh active">🛫 机票</span><span class="lang-en">🛫 Flights</span></a></li>
+</ul></nav>
+
+<section id="map-section">
+<div class="section-head"><h2 class="lang-zh active">🗺 三岛作战地图</h2><h2 class="lang-en">🗺 Three-Island Battle Map</h2><p class="lang-zh active">点击标记看"为什么值得去"</p><p class="lang-en">Tap any marker — see why it earned a spot</p></div>
+<div id="map-container"><div id="map"></div></div>
+<div class="map-legend">
+<div class="legend-dot"><span style="background:var(--oahu)"></span> <span class="lang-zh active">Day 1-3 欧胡</span><span class="lang-en">Day 1-3 Oʻahu</span></div>
+<div class="legend-dot"><span style="background:var(--bigisland)"></span> <span class="lang-zh active">Day 3-8 大岛</span><span class="lang-en">Day 3-8 Big Island</span></div>
+<div class="legend-dot"><span style="background:var(--maui)"></span> <span class="lang-zh active">Day 8-9 茂宜</span><span class="lang-en">Day 8-9 Maui</span></div>
+</div>
+</section>
+
+<section id="oahu" class="island-section">
+<div class="island-hero"><img src="img/oahu-header.jpg?w=800&h=280&fit=crop" alt="Oahu"><div class="overlay"></div><div class="title-block"><h3 class="lang-zh active">🏝️ 欧胡岛：侏罗纪与翡翠海岸</h3><h3 class="lang-en">🏝️ Oʻahu: Jurassic Valley &amp; Emerald Coast</h3><p class="tagline lang-zh active">Windward Coast → Kualoa Ranch → 北岸浮潜 → 檀香山</p><p class="tagline lang-en">Windward Coast → Kualoa Ranch → North Shore → Honolulu</p></div></div>
+<div class="spot-grid">
+<div class="spot-card"><div class="spot-img"><img src="img/kualoa.jpg?w=400&h=200&fit=crop" alt="Kualoa"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Kualoa Ranch 古兰尼牧场 🔥</h4><h4 class="lang-en">Kualoa Ranch 🔥</h4><p class="hook lang-zh active">侏罗纪公园真实取景地。骑UTV冲进那片你在电影里见过的山谷，恐龙随时会从林子里冲出来。</p><p class="hook lang-en">Where they filmed Jurassic Park. Rip through the valley on a UTV — the same valley you've seen on screen.</p><div class="meta"><span>⏱ 2h UTV</span><span>🎫 kualoa.com</span><span>💲 ~$150</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/Gc4qFzJjULDFBtVJ6" target="_blank">🗺 Maps</a><a class="btn btn-book" href="https://www.kualoa.com/tours-and-activities/utv-raptor-tour" target="_blank">🎫 Book</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/lanikai.png?w=400&h=200&fit=crop" alt="Lanikai"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Lanikai Beach 🌅</h4><h4 class="lang-en">Lanikai Beach 🌅</h4><p class="hook lang-zh active">夏威夷公认最美沙滩。白沙+双岛+玛瑙绿水——本地人的私家海滩，只有我们和太平洋的日出。</p><p class="hook lang-en">Hawaii's most beautiful beach. Powder sand, twin islands, jade water — a local secret.</p><div class="meta"><span>⏱ 45min</span><span>🚗 6am arrive</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/DXFGRJMDgBNNbJnX7" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/pali.png" alt="Pali"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Nuʻuanu Pali Lookout 🌬️</h4><h4 class="lang-en">Nuʻuanu Pali Lookout 🌬️</h4><p class="hook lang-zh active">站在600米峭壁上俯瞰整条Windward Coast。风能把头发吹成图腾柱。落地的第一个震撼。</p><p class="hook lang-en">600m cliff over the entire Windward Coast. Hawaii's opening statement hits hard.</p><div class="meta"><span>⏱ 30min</span><span>🅿️ $3/h</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/NjEi98Z3jZZp1QL97" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/sharks.png?w=400&h=200&fit=crop" alt="Sharks"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Shark's Cove 🐠</h4><h4 class="lang-en">Shark's Cove 🐠</h4><p class="hook lang-zh active">9月底水温28°，能见度全岛最顶。珊瑚礁鱼群密集到你伸手就能摸到——比Hanauma Bay清澈还不用抢票。</p><p class="hook lang-en">Late Sep water 28°C, peak visibility. Fish so dense they bump into you. No ticket needed.</p><div class="meta"><span>⏱ 2h</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/K5kJCjB8YLJAL4RM8" target="_blank">🗺 Maps</a></div></div></div>
+</div>
+</section>
+
+<section id="bigisland" class="island-section">
+<div class="island-hero"><img src="img/bigisland-header.jpg?w=800&h=280&fit=crop" alt="Big Island"><div class="overlay"></div><div class="title-block"><h3 class="lang-zh active">🌋 大岛：活火山与银河之巅</h3><h3 class="lang-en">🌋 Big Island: Lava + Galaxy Summit</h3><p class="tagline lang-zh active">火山国家公园 → Mauna Kea星空 → Kona日落 → 绿沙滩</p><p class="tagline lang-en">Volcanoes NP → Mauna Kea Stars → Kona Sunsets → Green Sand</p></div></div>
+<div class="spot-grid">
+<div class="spot-card"><div class="spot-img"><img src="img/hvnp.png?w=400&h=200&fit=crop" alt="HVNP"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">火山国家公园 · Kīlauea 🌋</h4><h4 class="lang-en">Hawaiʻi Volcanoes NP 🌋</h4><p class="hook lang-zh active">站在Halemaʻumaʻu火山口边缘，凌晨熔岩红光把整片天空烧成橙色。全美国只有一个地方能看正在喷发的火山——就在脚下。</p><p class="hook lang-en">Stand at the rim as midnight lava glow paints the sky orange. The only place in America with an active eruption — right beneath your feet.</p><div class="meta"><span>⏱ 2 full days</span><span>🕐 24h</span><span>💰 $35/car</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/9sME8vSPBraqXrH79" target="_blank">🗺 Maps</a><a class="btn btn-book" href="https://www.usgs.gov/volcanoes/kilauea/volcano-updates" target="_blank">🌋 USGS</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/maunakea.png" alt="Mauna Kea"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Mauna Kea 天文台 🌌</h4><h4 class="lang-en">Mauna Kea Observatories 🌌</h4><p class="hook lang-zh active">海拔4,205米，云层在脚下翻滚。太阳消失时银河开灯——土星环、木星卫星，裸眼！免费望远镜。冷到发抖但不想走。</p><p class="hook lang-en">4,205m. Clouds beneath your feet. Milky Way flicks on at sunset. Saturn's rings naked-eye. Free telescopes.</p><div class="meta"><span>⏱ Full day</span><span>🌡 -2~8°C</span><span>⚠️ 4WD only</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/DdG8hgSC5VupPYdS8" target="_blank">🗺 Maps</a><a class="btn btn-book" href="https://hilo.hawaii.edu/maunakea/visitor-information/station" target="_blank">ℹ️ VIS</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/seearch.png?w=400&h=200&fit=crop" alt="Sea Arch"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Holei Sea Arch 🌊</h4><h4 class="lang-en">Holei Sea Arch 🌊</h4><p class="hook lang-zh active">熔岩台地尽头，太平洋巨浪拍碎玄武岩拱门。背后是刚凝固的新大地。地球造陆直播。</p><p class="hook lang-en">Where lava meets ocean. Waves smash a basalt arch. Behind you: brand-new land.</p><div class="meta"><span>⏱ 30min</span><span>💰 Included</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/CgYVPgpnCwqx2AaGA" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/kilaueaiki.png?w=400&h=200&fit=crop" alt="Kilauea Iki"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Kīlauea Iki Trail 🥾</h4><h4 class="lang-en">Kīlauea Iki Trail 🥾</h4><p class="hook lang-zh active">走在几十米厚的凝固熔岩湖上，像月球表面，中间蒸汽口嘶嘶冒烟。4英里，此生最科幻的徒步。</p><p class="hook lang-en">Walk across a 1959 lava lake. Moon surface + hissing steam vents. 4mi RT.</p><div class="meta"><span>⏱ 3h</span><span>📏 4mi</span><span>💰 Included</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/vHoJ4yLqiMwPtMg17" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/pololu.png?w=400&h=200&fit=crop" alt="Pololu"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Pololu Valley Lookout 🏞️</h4><h4 class="lang-en">Pololu Valley Lookout 🏞️</h4><p class="hook lang-zh active">绝美山谷+黑沙滩+悬崖海岸全景。Waipio的聪明替代——少20%景色省2小时体力。</p><p class="hook lang-en">Stunning valley + black sand + cliffs — zero hiking needed. Saves 2 hours vs Waipiʻo.</p><div class="meta"><span>⏱ 45min</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/NF1X7Lw6exxBEFfz9" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/greensand.png" alt="Green Sand"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Papakolea 绿沙滩 💚</h4><h4 class="lang-en">Papakolea Green Sand 💚</h4><p class="hook lang-zh active">全世界只有4处橄榄石沙滩，美国唯一。沙子是翠绿色的，像碾碎的翡翠。走45分钟进去但嘴会合不上。</p><p class="hook lang-en">One of only 4 green sand beaches on Earth. Sand is crushed olivine gemstone. Jaw-dropping arrival.</p><div class="meta"><span>⏱ 1.5h RT</span><span>🥾 2.5mi</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/s4e7V9MbuMxHjmHj8" target="_blank">🗺 Maps</a></div></div></div>
+</div>
+</section>
+
+<section id="maui" class="island-section">
+<div class="island-hero"><img src="img/maui-header.jpg" alt="Maui"><div class="overlay"></div><div class="title-block"><h3 class="lang-zh active">🌺 茂宜岛：云海日落与山脊徒步</h3><h3 class="lang-en">🌺 Maui: Cloud-Sea Sunset &amp; Ridge Trail</h3><p class="tagline lang-zh active">Haleakalā日落 → Waihee Ridge → Ho'okipa风帆</p><p class="tagline lang-en">Haleakalā Sunset → Waihee Ridge → Hoʻokipa</p></div></div>
+<div class="spot-grid">
+<div class="spot-card"><div class="spot-img"><img src="img/haleakala.png?w=400&h=200&fit=crop" alt="Haleakala"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Haleakalā 日落云海 🌅</h4><h4 class="lang-en">Haleakalā Sunset 🌅</h4><p class="hook lang-zh active">云海在脚下流动，太阳沉入地平线时橙紫深蓝三色同时染满3千米高空。日落后银河上线。⚠️ 日落无需预约！</p><p class="hook lang-en">Clouds beneath your feet, sky exploding orange-purple-navy at 3,000m. Milky Way after. ⚠️ No reservation for sunset!</p><div class="meta"><span>⏱ Afternoon</span><span>🌡 4-12°C</span><span>💰 $30/car</span><span>✅ No reservation</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/CGJptFHVLBsxF4GC8" target="_blank">🗺 Maps</a><a class="btn btn-book" href="https://www.nps.gov/hale/index.htm" target="_blank">ℹ️ NPS</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/waihee.png?w=400&h=200&fit=crop" alt="Waihee"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Waihee Ridge Trail 🥾</h4><h4 class="lang-en">Waihee Ridge Trail 🥾</h4><p class="hook lang-zh active">雨林山脊徒步，360度俯瞰茂宜北岸和Kahului湾。云雾从树丛里冒出来环绕着你。4英里往返。</p><p class="hook lang-en">Rainforest ridge with 360° views over North Maui. Clouds drift through the canopy around you. 4mi RT.</p><div class="meta"><span>⏱ 3h</span><span>📏 4mi</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/wfNPVNkT7yv6nfgH8" target="_blank">🗺 Maps</a></div></div></div>
+
+<div class="spot-card"><div class="spot-img"><img src="img/hookipa.jpeg" alt="Hookipa"><span class="replace-hint">🖼 replace</span></div><div class="spot-body"><h4 class="lang-zh active">Ho'okipa Beach Park 🏄</h4><h4 class="lang-en">Hoʻokipa Beach Park 🏄</h4><p class="hook lang-zh active">全球风帆/风筝冲浪圣地。站在悬崖上看空中翻腾的剪影——纯看表演也超值。离岛前最强收尾。</p><p class="hook lang-en">World capital of windsurfing. Watch silhouettes flipping through the air from the cliff. Perfect send-off.</p><div class="meta"><span>⏱ 45min</span><span>💰 Free</span></div><div class="btn-group"><a class="btn btn-nav" href="https://maps.app.goo.gl/4SMgAYAeeDhkHcqW9" target="_blank">🗺 Maps</a></div></div></div>
+</div>
+</section>
+
+<section id="timeline">
+<div class="section-head"><h2 class="lang-zh active">📅 9日行程</h2><h2 class="lang-en">📅 9-Day Timeline</h2></div>
+<div class="timeline">
+<div class="timeline-day" style="border-left:3px solid var(--oahu)"><div class="day-num">Day 1<br>9/28</div><div class="day-content"><div class="day-title lang-zh active">落地 · Windward Coast</div><div class="day-title lang-en">Arrival · Windward Coast</div><div class="day-desc lang-zh active">HNL 16:00 → Pali Lookout → Kailua 晚餐。住 Kailua。</div><div class="day-desc lang-en">Land HNL 16:00 → Pali Lookout → Kailua dinner. Stay Kailua.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--oahu)"><div class="day-num">Day 2<br>9/29</div><div class="day-content"><div class="day-title lang-zh active">🦖 侏罗纪 + 北岸浮潜</div><div class="day-title lang-en">🦖 Jurassic + North Shore</div><div class="day-desc lang-zh active">Lanikai 日出 → Kualoa UTV → Shark's Cove → Shave Ice。住 Kailua。</div><div class="day-desc lang-en">Lanikai → Kualoa UTV → Shark's Cove → Shave Ice. Stay Kailua.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--oahu)"><div class="day-num">Day 3<br>9/30</div><div class="day-content"><div class="day-title lang-zh active">🛒 集市 → ✈️ 飞大岛</div><div class="day-title lang-en">🛒 Market → ✈️ Big Island</div><div class="day-desc lang-zh active">KCC Farmers Market → Waikiki → HNL✈️ITO → Akaka Falls。住 Hilo。</div><div class="day-desc lang-en">Farmers Market → Waikiki → HNL✈️ITO → Akaka Falls. Stay Hilo.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--bigisland)"><div class="day-num">Day 4<br>10/1</div><div class="day-content"><div class="day-title lang-zh active">🌋 火山公园 · 夜间熔岩辉光</div><div class="day-title lang-en">🌋 Volcanoes NP · Lava Glow</div><div class="day-desc lang-zh active">Crater Rim → Lava Tube → Chain of Craters → Sea Arch → 辉光！住 Hilo。</div><div class="day-desc lang-en">Crater Rim → Lava Tube → Chain of Craters → lava glow! Stay Hilo.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--bigisland)"><div class="day-num">Day 5<br>10/2</div><div class="day-content"><div class="day-title lang-zh active">🌌 Mauna Kea · 云海+观星</div><div class="day-title lang-en">🌌 Mauna Kea · Sunset+Stars</div><div class="day-desc lang-zh active">Saddle Road → VIS → 4WD上顶 → 日落 → 银河。住 Hilo。</div><div class="day-desc lang-en">Saddle Road → VIS → 4WD summit → sunset → galaxy. Stay Hilo.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--bigisland)"><div class="day-num">Day 6<br>10/3</div><div class="day-content"><div class="day-title lang-zh active">🏞️ 横穿大岛 → 移住Kona</div><div class="day-title lang-en">🏞️ Cross-Island → Kona</div><div class="day-desc lang-zh active">Waimea → Pololu Valley → Kua Bay → Kona日落。住 Kona。</div><div class="day-desc lang-en">Waimea → Pololu Valley → Kua Bay → Kona sunset. Stay Kona.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--bigisland)"><div class="day-num">Day 7<br>10/4</div><div class="day-content"><div class="day-title lang-zh active">🌋 火山二刷 + 南部海岸</div><div class="day-title lang-en">🌋 Volcano R2 + South Coast</div><div class="day-desc lang-zh active">Kīlauea Iki 徒步 → South Point → 绿沙滩。住 Kona。</div><div class="day-desc lang-en">Kīlauea Iki hike → South Point → Green Sand. Stay Kona.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--maui)"><div class="day-num">Day 8<br>10/5</div><div class="day-content"><div class="day-title lang-zh active">☕ Kona咖啡 → ✈️ 茂宜 → 日落</div><div class="day-title lang-en">☕ Coffee → ✈️ Maui → Sunset</div><div class="day-desc lang-zh active">Holualoa 咖啡 → KOA✈️OGG → Haleakalā日落 ⭐。住 Kihei。</div><div class="day-desc lang-en">Coffee farm → KOA✈️OGG → Haleakalā sunset ⭐. Stay Kihei.</div></div></div>
+<div class="timeline-day" style="border-left:3px solid var(--maui)"><div class="day-num">Day 9<br>10/6</div><div class="day-content"><div class="day-title lang-zh active">🥾 Waihee → ✈️ 22:00离岛</div><div class="day-title lang-en">🥾 Waihee → ✈️ Depart 22:00</div><div class="day-desc lang-zh active">Waihee Ridge → Paia 早午餐 → Ho'okipa → Costco → OGG 🛫</div><div class="day-desc lang-en">Waihee Ridge → Paia brunch → Hoʻokipa → Costco → OGG 🛫</div></div></div>
+</div>
+</section>
+
+<section id="transport">
+<div class="section-head"><h2 class="lang-zh active">✈️ 交通</h2><h2 class="lang-en">✈️ Transport</h2></div>
+<div class="transport-grid">
+<div class="transport-card"><div class="icon">✈️</div><h4>HNL → ITO (Hilo)</h4><p class="lang-zh active"><strong>Hawaiian Airlines</strong> · 40min · $80-$120/人<br>班次频繁，推荐 10:00-11:00 出发</p><p class="lang-en"><strong>Hawaiian Airlines</strong> · 40min · $80-$120<br>Frequent departures, aim 10:00-11:00</p></div>
+<div class="transport-card"><div class="icon">✈️</div><h4>KOA → OGG (Maui)</h4><p class="lang-zh active"><strong>Hawaiian Airlines</strong> · 25min · $80-$120/人<br>推荐 11:30-13:00 出发，普通SUV即可</p><p class="lang-en"><strong>Hawaiian Airlines</strong> · 25min · $80-$120<br>Aim 11:30-13:00. Regular SUV fine.</p></div>
+<div class="transport-card"><div class="icon">🚗</div><h4 class="lang-zh active">大岛 4WD 租车</h4><h4 class="lang-en">Big Island 4WD</h4><p class="lang-zh active"><strong>Harper Car &amp; Truck Rentals</strong><br>📞 (808) 969-1478 · Hilo<br>⭐ Mauna Kea上顶唯一批准<br>⚠️ 提前2-4周电话预订！</p><p class="lang-en"><strong>Harper Car &amp; Truck Rentals</strong><br>📞 (808) 969-1478 · Hilo<br>⭐ Only company allowing summit<br>⚠️ Book 2-4 weeks ahead!</p></div>
+<div class="transport-card"><div class="icon">⚠️</div><h4 class="lang-zh active">禁区</h4><h4 class="lang-en">⚠️ Restrictions</h4><p class="lang-zh active">Enterprise/Hertz 禁止上 Mauna Kea<br>Waipio Valley 已封闭<br>Haleakalā 日落无需预约 ✌️</p><p class="lang-en">Enterprise/Hertz ban Mauna Kea summit<br>Waipio Valley closed<br>Haleakalā sunset = no reservation ✌️</p></div>
+</div>
+</section>
+
+<section id="accommodation">
+<div class="section-head"><h2 class="lang-zh active">🏨 住宿</h2><h2 class="lang-en">🏨 Where We Stay</h2></div>
+<div class="accom-grid">
+<div class="accom-card recommended"><h4>🏝️ <span class="lang-zh active">欧胡 · Kailua (2晚)</span><span class="lang-en">Oʻahu · Kailua (2n)</span></h4><p class="lang-zh active">Lanikai沙滩在门口，本地氛围浓，比Waikiki便宜一半海滩好两倍。</p><p class="lang-en">Lanikai Beach at doorstep. Local vibe, half Waikiki price, twice the beach.</p></div>
+<div class="accom-card recommended"><h4>🌋 <span class="lang-zh active">大岛 · Hilo (3晚)</span><span class="lang-en">Big Island · Hilo (3n)</span></h4><p class="lang-zh active">最接近火山公园，本地人多，物价低。火山不需要晴天。</p><p class="lang-en">Closest to volcano. Local town, low prices. Volcanoes don't need sunshine.</p></div>
+<div class="accom-card"><h4>🌅 <span class="lang-zh active">大岛 · Kona (2晚)</span><span class="lang-en">Big Island · Kona (2n)</span></h4><p class="lang-zh active">日落海岸，阳光充沛，海鲜丰富。飞茂宜前完美过渡。</p><p class="lang-en">Sunset coast, great seafood. Perfect transition before Maui.</p></div>
+<div class="accom-card recommended"><h4>🌺 <span class="lang-zh active">茂宜 · Kihei (1晚)</span><span class="lang-en">Maui · Kihei (1n)</span></h4><p class="lang-zh active">海滩好，超市方便，离Haleakalā和OGG都近。</p><p class="lang-en">Great beach, convenient, close to Haleakalā and OGG.</p></div>
+</div>
+</section>
+
+<section id="checklist">
+<div class="section-head"><h2 class="lang-zh active">📋 必预约清单</h2><h2 class="lang-en">📋 Must-Book List</h2></div>
+<div class="checklist">
+<div class="checklist-item"><span class="urgent high">🔴 <span class="lang-zh active">8月初</span><span class="lang-en">Early Aug</span></span> <strong>Kualoa Ranch UTV Tour</strong> — kualoa.com · <span class="lang-zh active">提前2-4周·旺季秒空</span><span class="lang-en">2-4wk ahead·sells out</span></div>
+<div class="checklist-item"><span class="urgent high">🔴 <span class="lang-zh active">8月中</span><span class="lang-en">Mid Aug</span></span> <strong>Harper 4WD 租车</strong> — 📞 (808) 969-1478 · <span class="lang-zh active">提前2-4周·车辆极少</span><span class="lang-en">2-4wk ahead·limited fleet</span></div>
+<div class="checklist-item"><span class="urgent mid">🟠 <span class="lang-zh active">9/20</span><span class="lang-en">Sep 20</span></span> <strong>Waiʻanapanapa 停车</strong> — gostateparks.hawaii.gov · <span class="lang-zh active">14天前开放</span><span class="lang-en">opens 14d before</span></div>
+<div class="checklist-item"><span class="urgent mid">🟠 <span class="lang-zh active">9月</span><span class="lang-en">Sep</span></span> <strong>跨岛机票</strong> — hawaiianairlines.com · <span class="lang-zh active">60-90天前最便宜</span><span class="lang-en">best 60-90d out</span></div>
+<div class="checklist-item"><span class="urgent low">🟢 <span class="lang-zh active">出发前</span><span class="lang-en">Before trip</span></span> <strong>USGS 火山实时状态</strong> — usgs.gov/volcanoes/kilauea</div>
+</div>
+</section>
+
+<section id="flight-search">
+<div class="section-head"><h2 class="lang-zh active">🛫 飞往夏威夷</h2><h2 class="lang-en">🛫 Fly to Hawaiʻi</h2><p class="lang-zh active">朋友从这里搜飞檀香山的航班 — Skyscanner一键直达</p><p class="lang-en">Search flights from your city to Honolulu — Skyscanner</p></div>
+<div class="flight-tool"><div class="flight-form">
+<select id="skyscanner-origin" style="min-width:160px">
+<option value="LON">🇬🇧 London LON</option>
+<option value="SFO">🇺🇸 San Francisco SFO</option>
+<option value="LAX">🇺🇸 Los Angeles LAX</option>
+<option value="SEA">🇺🇸 Seattle SEA</option>
+<option value="NYC">🇺🇸 New York NYC</option>
+<option value="NRT">🇯🇵 Tokyo NRT</option>
+<option value="SYD">🇦🇺 Sydney SYD</option>
+<option value="YVR">🇨🇦 Vancouver YVR</option>
+</select>
+<span style="font-size:1.3rem;align-self:center">→</span>
+<div style="display:flex;align-items:center;gap:4px;padding:10px 14px;border-radius:10px;border:2px solid #e0e0e0;font-size:.9rem">🇺🇸 Honolulu <strong>HNL</strong></div>
+<button onclick="window.open('https://www.skyscanner.com/transport/flights/'+(document.getElementById('skyscanner-origin').value||'LON').toLowerCase()+'/hnl/260928/?adultsv2=1','_blank')">🔍 <span class="lang-zh active">搜索</span><span class="lang-en">Search</span></button>
+</div><p style="margin-top:12px;font-size:.78rem;color:#888"><span class="lang-zh active">跳转 Skyscanner · 9月28日 · HNL 檀香山</span><span class="lang-en">Opens Skyscanner · Sep 28 · HNL Honolulu</span></p></div>
+</section>
+
+<footer><p style="font-size:1.5rem">🏝️🌋🌺</p><p style="margin-top:12px"><span class="lang-zh active">Trip by Juliette · 2026夏威夷 · Oahu → Big Island → Maui</span><span class="lang-en">Trip by Juliette · Hawaiʻi 2026 · Oʻahu → Big Island → Maui</span></p></footer>
+
+<script>
+(function(){
+  try {
+    var m = L.map('map').setView([20.5, -156.5], 8);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {attribution:'&copy; OSM &copy; CARTO',maxZoom:18}).addTo(m);
+    var mk=[
+      {lat:21.3633,lng:-157.7906,p:'<b>Pali Lookout</b><br>600m cliff over Windward Coast.<br><a href="https://maps.app.goo.gl/NjEi98Z3jZZp1QL97">🗺 Navigate</a>',c:'oahu'},
+      {lat:21.3905,lng:-157.7189,p:'<b>Lanikai Beach</b><br>Hawaii most beautiful beach.<br><a href="https://maps.app.goo.gl/DXFGRJMDgBNNbJnX7">🗺 Navigate</a>',c:'oahu'},
+      {lat:21.5218,lng:-157.8374,p:'<b>Kualoa Ranch</b><br>Jurassic Park. Ride UTV.<br><a href="https://maps.app.goo.gl/Gc4qFzJjULDFBtVJ6">🗺 Navigate</a><br><a href="https://www.kualoa.com">🎫 Book</a>',c:'oahu'},
+      {lat:21.6598,lng:-158.0524,p:'<b>Shark\'s Cove</b><br>Crystal snorkeling. No ticket.<br><a href="https://maps.app.goo.gl/K5kJCjB8YLJAL4RM8">🗺 Navigate</a>',c:'oahu'},
+      {lat:19.4287,lng:-155.2573,p:'<b>Volcanoes NP</b><br>Active Kīlauea! Lava glow.<br><a href="https://maps.app.goo.gl/9sME8vSPBraqXrH79">🗺 Navigate</a><br><a href="https://www.usgs.gov/volcanoes/kilauea/volcano-updates">🌋 USGS</a>',c:'bigisland'},
+      {lat:19.8222,lng:-155.4714,p:'<b>Mauna Kea</b><br>4,205m. Cloud-sea + Milky Way.<br><a href="https://maps.app.goo.gl/DdG8hgSC5VupPYdS8">🗺 Navigate</a>',c:'bigisland'},
+      {lat:19.2944,lng:-155.0917,p:'<b>Holei Sea Arch</b><br>Lava meets ocean.<br><a href="https://maps.app.goo.gl/CgYVPgpnCwqx2AaGA">🗺 Navigate</a>',c:'bigisland'},
+      {lat:19.4159,lng:-155.2398,p:'<b>Kīlauea Iki Trail</b><br>Walk across 1959 lava lake.<br><a href="https://maps.app.goo.gl/vHoJ4yLqiMwPtMg17">🗺 Navigate</a>',c:'bigisland'},
+      {lat:20.2033,lng:-155.7111,p:'<b>Pololu Valley</b><br>Stunning valley. No hiking.<br><a href="https://maps.app.goo.gl/NF1X7Lw6exxBEFfz9">🗺 Navigate</a>',c:'bigisland'},
+      {lat:18.9364,lng:-155.6764,p:'<b>Green Sand Beach</b><br>One of 4 on Earth.<br><a href="https://maps.app.goo.gl/s4e7V9MbuMxHjmHj8">🗺 Navigate</a>',c:'bigisland'},
+      {lat:20.7104,lng:-156.2492,p:'<b>Haleakalā Sunset</b><br>3,000m. No reservation!<br><a href="https://maps.app.goo.gl/CGJptFHVLBsxF4GC8">🗺 Navigate</a>',c:'maui'},
+      {lat:20.9297,lng:-156.5364,p:'<b>Waihee Ridge</b><br>Rainforest ridge. 360° views.<br><a href="https://maps.app.goo.gl/wfNPVNkT7yv6nfgH8">🗺 Navigate</a>',c:'maui'},
+      {lat:20.9306,lng:-156.3608,p:'<b>Hoʻokipa Beach</b><br>World windsurfing capital.<br><a href="https://maps.app.goo.gl/4SMgAYAeeDhkHcqW9">🗺 Navigate</a>',c:'maui'}
+    ];
+    var ic={oahu:'#FF6B35',bigisland:'#E63946',maui:'#457B9D'};
+    mk.forEach(function(k){var i=L.divIcon({className:'',html:'<div style="background:'+ic[k.c]+';width:28px;height:28px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);text-align:center;line-height:22px;color:white;font-size:14px">📍</div>',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-16]});L.marker([k.lat,k.lng],{icon:i}).addTo(m).bindPopup(k.p);});
+  } catch(e){console.warn('Map init failed:',e);}
+})();
+window.switchLang = function(lang){
+  document.querySelectorAll('.lang-zh,.lang-en').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.lang-'+lang).forEach(function(el){el.classList.add('active');});
+  var bz=document.getElementById('btn-zh'),be=document.getElementById('btn-en');
+  if(bz)bz.classList.toggle('active',lang==='zh');
+  if(be)be.classList.toggle('active',lang==='en');
+};
+</script>
+</body>
+</html>
